@@ -1,13 +1,12 @@
-// src/components/Autocomplete/AutocompleteDemo.tsx
 import { Autocomplete } from "./Autocomplete";
 
 export default function AutocompleteDemo() {
-  const handleSelect = (v: string) => alert(`Selecionou: ${v}`);
+  const handleSelect = (v: string) => alert(`Selected: ${v}`);
 
   return (
     <div style={{ padding: 24 }}>
       <h2>Autocomplete (TypeScript + React)</h2>
-      <p>Digite por exemplo: "b" ou "bo" para ver resultados.</p>
+      <p>Start typing, e.g., "b" or "bo" to see results.</p>
       <Autocomplete onSelect={handleSelect} />
     </div>
   );

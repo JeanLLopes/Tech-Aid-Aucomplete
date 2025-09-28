@@ -1,73 +1,64 @@
-# React + TypeScript + Vite
+# React Autocomplete Component
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A simple, accessible, and reusable Autocomplete component built with React and TypeScript. This project serves as a demonstration of best practices in component design, including debouncing, caching, and accessibility.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Debounced Search**: API calls are debounced to prevent excessive requests while the user is typing.
+- **Request Caching**: Caches results for previously made queries to improve performance.
+- **Abortable Fetch**: Cancels previous in-flight requests when a new one is initiated.
+- **Keyboard Navigation**: Full support for keyboard navigation (Up/Down arrows, Enter to select, Escape to close).
+- **Accessibility**: Implements WAI-ARIA patterns for combobox widgets to ensure it's accessible to screen reader users.
+- **Clean Architecture**: Organized into separate files for the component, API logic, and types for better maintainability.
 
-## React Compiler
+## Getting Started
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+To run this project locally, follow these steps:
 
-## Expanding the ESLint configuration
+1.  Clone the repository:
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+    ```bash
+    git clone <your-repo-url>
+    cd autocomplete-app
+    ```
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+2.  Install dependencies:
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+    ```bash
+    npm install
+    ```
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+3.  Start the development server:
+    ```bash
+    npm start
+    ```
+    The application will be available at `http://localhost:3000`.
+
+## Usage
+
+Here's a basic example of how to use the `Autocomplete` component.
+
+```tsx
+import { Autocomplete } from "./components/Autocomplete";
+
+function MyApp() {
+  const handleSelect = (city: string) => {
+    alert(`You selected: ${city}`);
+  };
+
+  return (
+    <div>
+      <h1>Search for a City</h1>
+      <Autocomplete onSelect={handleSelect} />
+    </div>
+  );
+}
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Component Props
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+| Prop             | Type                      | Default                  | Description                                                |
+| ---------------- | ------------------------- | ------------------------ | ---------------------------------------------------------- |
+| `placeholder`    | `string`                  | `"Search for a city..."` | Placeholder text for the input field.                      |
+| `onSelect`       | `(value: string) => void` | `undefined`              | Callback function invoked when an item is selected.        |
+| `minQueryLength` | `number`                  | `1`                      | Minimum number of characters required to trigger a search. |

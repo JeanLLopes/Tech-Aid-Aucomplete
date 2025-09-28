@@ -1,10 +1,30 @@
-// src/components/Autocomplete/Autocomplete.tsx
 import React, { useEffect, useRef, useState, useId } from "react";
 import { searchCities } from "./api";
 import type { AutocompleteProps } from "./Autocomplete.types";
 
+/**
+ * Autocomplete component for searching and selecting city names.
+ *
+ * This component provides an accessible, keyboard-navigable autocomplete input field.
+ * It supports debounced async search, result caching, keyboard and mouse navigation,
+ * and closes the dropdown when clicking outside.
+ *
+ * @param {AutocompleteProps} props - The props for the Autocomplete component.
+ * @param {string} [props.placeholder="Search for a city..."] - Placeholder text for the input field.
+ * @param {(value: string) => void} props.onSelect - Callback invoked when a city is selected.
+ * @param {number} [props.minQueryLength=1] - Minimum number of characters required to trigger a search.
+ *
+ * @returns {JSX.Element} The rendered Autocomplete component.
+ *
+ * @example
+ * <Autocomplete
+ *   onSelect={(city) => console.log(city)}
+ *   placeholder="Type a city name"
+ *   minQueryLength={2}
+ * />
+ */
 export function Autocomplete({
-  placeholder = "Buscar cidade...",
+  placeholder = "Search for a city...",
   onSelect,
   minQueryLength = 1,
 }: AutocompleteProps) {
@@ -142,7 +162,7 @@ export function Autocomplete({
         htmlFor={`${uid}-input`}
         style={{ display: "block", marginBottom: 6 }}
       >
-        Cidade
+        City
       </label>
       <input
         id={`${uid}-input`}
@@ -185,9 +205,9 @@ export function Autocomplete({
           }}
         >
           {loading ? (
-            <div style={{ padding: 8 }}>Carregando...</div>
+            <div style={{ padding: 8 }}>Loading...</div>
           ) : results.length === 0 ? (
-            <div style={{ padding: 8 }}>Nenhum resultado</div>
+            <div style={{ padding: 8 }}>No results found</div>
           ) : (
             results.map((item, idx) => {
               const isActive = idx === highlightedIndex;

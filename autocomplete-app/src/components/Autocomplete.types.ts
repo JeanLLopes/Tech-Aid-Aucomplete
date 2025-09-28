@@ -1,5 +1,3 @@
-// src/components/Autocomplete/Autocomplete.types.ts
-
 export interface AutocompleteProps {
   placeholder?: string;
   onSelect?: (value: string) => void;
