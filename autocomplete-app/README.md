@@ -34,6 +34,16 @@ To run this project locally, follow these steps:
     ```
     The application will be available at `http://localhost:3000`.
 
+## Testing
+
+This project uses Vitest for the test runner and React Testing Library for rendering and interacting with components in a test environment.
+
+To run the test suite, execute the following command:
+
+```bash
+npm test
+```
+
 ## Usage
 
 Here's a basic example of how to use the `Autocomplete` component.
