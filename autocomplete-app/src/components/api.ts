@@ -1,5 +1,3 @@
-// src/components/Autocomplete/api.ts
-
 export function searchCities(
   q: string,
   { signal }: { signal?: AbortSignal } = {}
