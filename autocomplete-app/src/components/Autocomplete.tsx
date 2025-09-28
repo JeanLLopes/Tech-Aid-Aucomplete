@@ -1,60 +1,7 @@
+// src/components/Autocomplete/Autocomplete.tsx
 import React, { useEffect, useRef, useState, useId } from "react";
-
-/*
-Step-by-step / resumo (lê o código completo abaixo na mesma arquivo):
-1) A fake API `searchCities` (fornecida no enunciado) está incluída.
-2) Componente <Autocomplete /> implementado em TypeScript com:
-   - debounce de 300ms
-   - cancelamento de requisições em voo com AbortController
-   - cache por query (Map)
-   - navegação por teclado (ArrowUp/ArrowDown, Enter, Esc)
-   - roles ARIA (combobox, listbox, option) e aria-activedescendant
-   - fecha o dropdown ao clicar fora
-3) Um componente demo (default export) mostra como usar o componente.
-
-Como usar
-- Copie este arquivo para `src/components/Autocomplete.tsx` no seu projeto React+TS.
-- Importe onde precisar: `import Autocomplete from './components/Autocomplete';` e use `<Autocomplete onSelect={v => console.log(v)} />`.
-
-Observações técnicas
-- Usa `useId()` (React 18+) para gerar ids únicos. Se sua versão for anterior, troque por um gerador de id.
-- A fake API demora 400ms (intencional): o debounce de 300ms + a latência da API simula cancelamentos em digitação rápida.
-*/
-
-// --- Fake API (mesma função do enunciado) ---
-export function searchCities(
-  q: string,
-  { signal }: { signal?: AbortSignal } = {}
-) {
-  return new Promise<string[]>((resolve, reject) => {
-    const data = [
-      "Boston",
-      "Bogotá",
-      "Buenos Aires",
-      "Bangalore",
-      "Berlin",
-      "Barcelona",
-      "Beijing",
-      "Brisbane",
-    ];
-    const id = window.setTimeout(() => {
-      const res = data.filter((c) => c.toLowerCase().includes(q.toLowerCase()));
-      resolve(res);
-    }, 400);
-
-    signal?.addEventListener("abort", () => {
-      clearTimeout(id);
-      reject(new DOMException("Aborted", "AbortError"));
-    });
-  });
-}
-
-// --- Autocomplete component ---
-interface AutocompleteProps {
-  placeholder?: string;
-  onSelect?: (value: string) => void;
-  minQueryLength?: number; // default 1
-}
+import { searchCities } from "./api";
+import type { AutocompleteProps } from "./Autocomplete.types";
 
 export function Autocomplete({
   placeholder = "Buscar cidade...",
@@ -73,21 +20,19 @@ export function Autocomplete({
   const [results, setResults] = useState<string[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [highlightedIndex, setHighlightedIndex] = useState<number>(-1);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
 
   const listboxId = `${uid}-listbox`;
 
-  // Cleanup on unmount: abort any in-flight request and clear timeouts
+  // Cleanup
   useEffect(() => {
     return () => {
       controllerRef.current?.abort();
-      if (debounceRef.current) {
-        clearTimeout(debounceRef.current);
-      }
+      if (debounceRef.current) clearTimeout(debounceRef.current);
     };
   }, []);
 
-  // Close dropdown when clicking outside
+  // Fecha dropdown ao clicar fora
   useEffect(() => {
     const onDown = (e: MouseEvent) => {
       if (!rootRef.current) return;
@@ -100,9 +45,8 @@ export function Autocomplete({
     return () => document.removeEventListener("mousedown", onDown);
   }, []);
 
-  // Main effect: debounce + fetch + cache + abort
+  // Efeito: debounce + fetch + cache + abort
   useEffect(() => {
-    // clear previous debounce
     if (debounceRef.current) {
       clearTimeout(debounceRef.current);
       debounceRef.current = null;
@@ -110,7 +54,6 @@ export function Autocomplete({
 
     const q = query.trim();
     if (q.length < minQueryLength) {
-      // if query too short, clear results and stop
       setResults([]);
       setLoading(false);
       return;
@@ -119,7 +62,6 @@ export function Autocomplete({
     setLoading(true);
 
     debounceRef.current = window.setTimeout(async () => {
-      // use cached value when available
       if (cacheRef.current.has(q)) {
         setResults(cacheRef.current.get(q) || []);
         setLoading(false);
@@ -127,7 +69,6 @@ export function Autocomplete({
         return;
       }
 
-      // cancel previous in-flight request
       controllerRef.current?.abort();
       const controller = new AbortController();
       controllerRef.current = controller;
@@ -137,11 +78,7 @@ export function Autocomplete({
         cacheRef.current.set(q, res);
         setResults(res);
       } catch (err: unknown) {
-        // ignore abort errors (expected behavior when user types fast)
-        if (err instanceof DOMException && err.name === "AbortError") {
-          // aborted - do nothing
-        } else {
-          // unexpected
+        if (!(err instanceof DOMException && err.name === "AbortError")) {
           console.error(err);
         }
       } finally {
@@ -159,7 +96,7 @@ export function Autocomplete({
     };
   }, [query, minQueryLength]);
 
-  // keyboard handling
+  // Teclado
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "ArrowDown") {
       e.preventDefault();
@@ -261,7 +198,6 @@ export function Autocomplete({
                   role="option"
                   aria-selected={isActive}
                   onMouseDown={(e) => {
-                    // onMouseDown em vez de onClick evita que o input perca foco antes do select
                     e.preventDefault();
                     select(item);
                   }}
@@ -279,36 +215,6 @@ export function Autocomplete({
           )}
         </div>
       )}
-    </div>
-  );
-}
-
-// --- Demo (default export) ---
-export default function AutocompleteDemo() {
-  const handleSelect = (v: string) => alert(`Selecionou: ${v}`);
-
-  return (
-    <div style={{ padding: 24 }}>
-      <h2>Demo: Autocomplete (TypeScript + React)</h2>
-      <p>Comece a digitar: ex. "b" ou "bo" para ver resultados.</p>
-      <Autocomplete onSelect={handleSelect} />
-
-      <div style={{ marginTop: 24, color: "#666", fontSize: 13 }}>
-        <strong>Notas:</strong>
-        <ul>
-          <li>
-            Debounce: 300ms. A fake API tem 400ms de latência; digitação rápida
-            cancela chamadas anteriores.
-          </li>
-          <li>
-            Cache: mesma query usa resultados em cache (veja a variável{" "}
-            <code>cacheRef</code>).
-          </li>
-          <li>
-            Keyboard: ↑/↓ para navegar, Enter para selecionar, Esc para fechar.
-          </li>
-        </ul>
-      </div>
     </div>
   );
 }
